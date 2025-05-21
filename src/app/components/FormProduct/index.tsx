@@ -1,5 +1,4 @@
 import { StyledInput, StyledButton, StyledSelect } from '@/app/pages/lojista/styles'
-// Você pode usar react-icons ou qualquer biblioteca de ícones
 import { FaPlus, FaTimes, FaSave, FaTag } from 'react-icons/fa'
 
 interface ProdutoFormProps {
