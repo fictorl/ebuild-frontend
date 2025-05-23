@@ -59,7 +59,10 @@ export default function PainelLojista() {
             loading={handlers.loading}
             onSubmit={e => handlers.handleCreateProduto(e, token, () => handlers.handleVerEstoque(token))}
             onCancel={() => handlers.setShowForm(false)}
-            onNovaCategoria={() => handlers.setShowCategoriaForm(true)}
+            onNovaCategoria={() => {
+              console.log('Abrindo formulário de nova categoria');
+              handlers.setShowCategoriaForm(true);
+            }}
           />
           {handlers.showCategoriaForm && (
             <CategoriaForm
