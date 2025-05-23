@@ -7,7 +7,7 @@ import {
   getCategorias,
   createCategoria,
 } from '@/app/hooks/useLojistaData';
-import {jwtDecode } from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 
 export function usePainelLojistaHandlers() {
   const [produtos, setProdutos] = useState<any[]>([]);
@@ -100,13 +100,14 @@ export function usePainelLojistaHandlers() {
   };
 
   const handleAbrirFormProduto = async (token: string) => {
-    const produtosResult = await getProdutos(token);
-    const cnpjLoja = produtosResult[0]?.lojaCnpj || '';
-    setCnpj(cnpjLoja);
+    const decodedToken: any = jwtDecode(token);
+    const cnpjLoja = decodedToken?.cnpj;
+
     if (cnpjLoja) {
       const categoriasResult = await getCategorias(token, cnpjLoja);
       setCategoriasObj(categoriasResult || []);
     }
+
     setShowForm(true);
   };
 
@@ -115,13 +116,20 @@ export function usePainelLojistaHandlers() {
     console.log('Criando nova categoria:', novaCategoria);
 
     if (!novaCategoria.trim()) return;
+
     await createCategoria(token, novaCategoria.trim());
-    if (cnpj) {
-      const categoriasResult = await getCategorias(token, cnpj);
+
+    const decodedToken: any = jwtDecode(token);
+    const cnpjLoja = decodedToken?.cnpj;
+
+    if (cnpjLoja) {
+      const categoriasResult = await getCategorias(token, cnpjLoja);
       console.log('Categorias atualizadas:', categoriasResult);
+
       setCategoriasObj(categoriasResult || []);
       setCategorias(categoriasResult.map((cat: any) => cat.nome));
     }
+
     setNovaCategoria('');
     setShowCategoriaForm(false);
   };
