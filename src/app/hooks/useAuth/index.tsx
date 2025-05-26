@@ -32,7 +32,7 @@ export const useAuth = () => {
       if (userType === 'lojista') {
         router.push('/pages/lojista')
       } else {
-        router.push('/')
+        router.push('/pages/usuario')
       }
 
       return response

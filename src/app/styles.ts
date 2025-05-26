@@ -1,6 +1,5 @@
 import styled from 'styled-components'
 
-// Container principal
 export const Container = styled.div`
   display: flex;
   flex-direction: column;
@@ -9,7 +8,6 @@ export const Container = styled.div`
   padding: 2rem 1rem;
 `
 
-// Cabeçalho fixo no topo
 export const Header = styled.header`
   width: 100%;
   background: #ffc107;
@@ -23,7 +21,6 @@ export const Header = styled.header`
   z-index: 10;
 `
 
-// Título principal
 export const Title = styled.h1`
   font-family: 'Helvetica Neue', Arial, sans-serif;
   font-size: clamp(1.5rem, 4vw, 2.5rem);
@@ -33,15 +30,12 @@ export const Title = styled.h1`
   align-items: center;
 `
 
-// Logo ao lado do título
 export const Logo = styled.img`
   height: clamp(3rem, 10vw, 8rem);
   width: auto;
   margin-left: 0.75rem;
 `
 
-
-// Área de botões
 export const Divider = styled.div`
   display: flex;
   justify-content: space-between;
@@ -58,7 +52,6 @@ export const Divider = styled.div`
   }
 `
 
-// Coluna de botões
 export const Column = styled.div`
   flex: 1;
   display: flex;
