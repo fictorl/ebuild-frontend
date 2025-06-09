@@ -1,14 +1,14 @@
-import { StyledInput, StyledButton, StyledSelect } from '@/app/pages/lojista/styles'
-import { FaPlus, FaTimes, FaSave, FaTag } from 'react-icons/fa'
+import { StyledInput, StyledButton, StyledSelect } from '@/app/pages/lojista/styles';
+import { FaPlus, FaTimes, FaSave, FaTag } from 'react-icons/fa';
 
 interface ProdutoFormProps {
-  form: any
-  setForm: (fn: (f: any) => any) => void
-  categoriasObj: any[]
-  loading: boolean
-  onSubmit: (e: React.FormEvent) => void
-  onCancel: () => void
-  onNovaCategoria: () => void
+  form: any;
+  setForm: (fn: (f: any) => any) => void;
+  categoriasObj: any[];
+  loading: boolean;
+  onSubmit: (e: React.FormEvent) => void;
+  onCancel: () => void;
+  onNovaCategoria: () => void;
 }
 
 export function ProdutoForm({
@@ -20,6 +20,8 @@ export function ProdutoForm({
   onCancel,
   onNovaCategoria,
 }: ProdutoFormProps) {
+  const isEditing = !!form.id;
+
   return (
     <form
       onSubmit={onSubmit}
@@ -28,12 +30,12 @@ export function ProdutoForm({
         flexDirection: 'column',
         gap: 18,
         maxWidth: 420,
-        margin: '0 auto'
+        margin: '0 auto',
       }}
     >
       <h2 style={{ margin: 0, fontWeight: 700, color: '#212121', fontSize: '1.25rem' }}>
         <FaTag style={{ marginRight: 8, color: '#ffd600' }} />
-        Novo Produto
+        {isEditing ? 'Editar Produto' : 'Novo Produto'}
       </h2>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         <label style={{ fontWeight: 500 }}>Nome</label>
@@ -41,7 +43,7 @@ export function ProdutoForm({
           required
           placeholder="Nome do produto"
           value={form.nome}
-          onChange={e => setForm((f: any) => ({ ...f, nome: e.target.value }))}
+          onChange={(e) => setForm((f: any) => ({ ...f, nome: e.target.value }))}
         />
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -50,7 +52,7 @@ export function ProdutoForm({
           required
           placeholder="Descrição do produto"
           value={form.descricao}
-          onChange={e => setForm((f: any) => ({ ...f, descricao: e.target.value }))}
+          onChange={(e) => setForm((f: any) => ({ ...f, descricao: e.target.value }))}
         />
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -62,7 +64,7 @@ export function ProdutoForm({
           min="0"
           placeholder="Preço"
           value={form.preco}
-          onChange={e => setForm((f: any) => ({ ...f, preco: e.target.value }))}
+          onChange={(e) => setForm((f: any) => ({ ...f, preco: e.target.value }))}
         />
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -71,38 +73,69 @@ export function ProdutoForm({
           <StyledSelect
             required
             value={form.categoriaProdutoId}
-            onChange={e => setForm((f: any) => ({ ...f, categoriaProdutoId: e.target.value }))}
+            onChange={(e) => setForm((f: any) => ({ ...f, categoriaProdutoId: e.target.value }))}
             style={{ flex: 1 }}
+            disabled={isEditing}
           >
             <option value="">Selecione</option>
             {categoriasObj.map((cat) => (
-              <option key={cat.id} value={cat.id}>{cat.nome}</option>
+              <option key={cat.id} value={cat.id}>
+                {cat.nome}
+              </option>
             ))}
           </StyledSelect>
-          <StyledButton
-            type="button"
-            style={{ padding: '0.5rem 1rem', fontSize: '0.95rem', background: '#fffbe6', border: '1.5px solid #ffd600', display: 'flex', alignItems: 'center', gap: 6 }}
-            onClick={onNovaCategoria}
-          >
-            <FaPlus style={{ color: '#ffd600' }} />
-            Nova Categoria
-          </StyledButton>
+          {!isEditing && (
+            <StyledButton
+              type="button"
+              style={{
+                padding: '0.5rem 1rem',
+                fontSize: '0.95rem',
+                background: '#fffbe6',
+                border: '1.5px solid #ffd600',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+              }}
+              onClick={onNovaCategoria}
+            >
+              <FaPlus style={{ color: '#ffd600' }} />
+              Nova Categoria
+            </StyledButton>
+          )}
         </div>
       </div>
       <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
-        <StyledButton type="submit" disabled={loading} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+        <StyledButton
+          type="submit"
+          disabled={loading}
+          style={{
+            flex: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+          }}
+        >
           <FaSave />
-          {loading ? 'Salvando...' : 'Salvar Produto'}
+          {loading ? 'Salvando...' : isEditing ? 'Salvar Alterações' : 'Salvar Produto'}
         </StyledButton>
         <StyledButton
           type="button"
           onClick={onCancel}
-          style={{ background: '#eee', color: '#212121', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+          style={{
+            background: '#eee',
+            color: '#212121',
+            flex: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+          }}
         >
           <FaTimes />
           Cancelar
         </StyledButton>
       </div>
     </form>
-  )
+  );
 }

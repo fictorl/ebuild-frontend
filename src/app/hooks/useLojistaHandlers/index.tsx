@@ -6,15 +6,17 @@ import {
   deleteProduto,
   getCategorias,
   createCategoria,
+  updateProduto,
 } from '@/app/hooks/useLojistaData';
 import { jwtDecode } from 'jwt-decode';
+import { toast } from 'sonner';
 
 export function usePainelLojistaHandlers() {
   const [produtos, setProdutos] = useState<any[]>([]);
   const [categorias, setCategorias] = useState<string[]>([]);
   const [categoriaSelecionada, setCategoriaSelecionada] = useState<string>('');
   const [pedidos, setPedidos] = useState<any[] | null>(null);
-  const [form, setForm] = useState({ nome: '', descricao: '', preco: '', categoriaProdutoId: '' });
+  const [form, setForm] = useState({ id: '', nome: '', descricao: '', preco: '', categoriaProdutoId: '' });
   const [loading, setLoading] = useState(false);
   const [cnpj, setCnpj] = useState<string>('');
   const [categoriasObj, setCategoriasObj] = useState<any[]>([]);
@@ -40,7 +42,6 @@ export function usePainelLojistaHandlers() {
       if (!lojaCnpj) return;
     }
     const pedidosResult = await getPedidos(token, lojaCnpj);
-    console.log('pedidosResult', pedidosResult);
     setPedidos(pedidosResult?.pedidos || pedidosResult || []);
     setView('pedidos');
     return pedidosResult;
@@ -68,23 +69,40 @@ export function usePainelLojistaHandlers() {
     setView('estoque');
   };
 
-  const handleCreateProduto = async (e: React.FormEvent, token: string, after?: () => void) => {
+  const handleSubmitProduto = async (e: React.FormEvent, token: string, after?: () => void) => {
     e.preventDefault();
     setLoading(true);
+
     try {
-      await createProduto(token, {
-        nome: form.nome,
-        descricao: form.descricao,
-        preco: Number(form.preco),
-        categoriaProdutoId: Number(form.categoriaProdutoId),
-      });
+      if (form.id) {
+        // Modo de edição: Atualizar produto
+        await updateProduto(token, form.id, {
+          nome: form.nome || undefined,
+          descricao: form.descricao || undefined,
+          preco: form.preco ? Number(form.preco) : undefined,
+          categoriaProdutoId: form.categoriaProdutoId ? Number(form.categoriaProdutoId) : undefined,
+        });
+        toast.success('Produto atualizado com sucesso!');
+      } else {
+        // Modo de criação: Criar novo produto
+        await createProduto(token, {
+          nome: form.nome,
+          descricao: form.descricao,
+          preco: Number(form.preco),
+          categoriaProdutoId: Number(form.categoriaProdutoId),
+        });
+        toast.success('Produto criado com sucesso!');
+      }
+
       setShowForm(false);
-      setForm({ nome: '', descricao: '', preco: '', categoriaProdutoId: '' });
+      setForm({ id: '', nome: '', descricao: '', preco: '', categoriaProdutoId: '' });
       after && after();
-    } catch {
-      alert('Erro ao criar produto');
+    } catch (error) {
+      toast.error('Erro ao criar produto');
+      console.error(error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleDeleteProduto = async (id: number, token: string, after?: () => void) => {
@@ -94,12 +112,12 @@ export function usePainelLojistaHandlers() {
       await deleteProduto(token, id);
       after && after();
     } catch {
-      alert('Erro ao deletar produto');
+      toast.error('Erro ao deletar produto');
     }
     setLoading(false);
   };
 
-  const handleAbrirFormProduto = async (token: string) => {
+  const handleAbrirFormProduto = async (token: string, produto: any) => {
     const decodedToken: any = jwtDecode(token);
     const cnpjLoja = decodedToken?.cnpj;
 
@@ -111,9 +129,19 @@ export function usePainelLojistaHandlers() {
     setShowForm(true);
   };
 
+  const handleEditProduto = (produto: any) => {
+    setForm({
+      id: produto.id,
+      nome: produto.nome,
+      descricao: produto.descricao,
+      preco: produto.preco,
+      categoriaProdutoId: produto.categoriaProduto?.id || '',
+    });
+    setShowForm(true);
+  };
+
   const handleCriarCategoria = async (e: React.FormEvent, token: string) => {
     e.preventDefault();
-    console.log('Criando nova categoria:', novaCategoria);
 
     if (!novaCategoria.trim()) return;
 
@@ -124,8 +152,6 @@ export function usePainelLojistaHandlers() {
 
     if (cnpjLoja) {
       const categoriasResult = await getCategorias(token, cnpjLoja);
-      console.log('Categorias atualizadas:', categoriasResult);
-
       setCategoriasObj(categoriasResult || []);
       setCategorias(categoriasResult.map((cat: any) => cat.nome));
     }
@@ -162,9 +188,10 @@ export function usePainelLojistaHandlers() {
     produtosFiltrados,
     handleVerPedidos,
     handleVerEstoque,
-    handleCreateProduto,
+    handleSubmitProduto,
     handleDeleteProduto,
     handleAbrirFormProduto,
+    handleEditProduto,
     handleCriarCategoria,
   };
 }

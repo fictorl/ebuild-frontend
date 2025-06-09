@@ -1,17 +1,19 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Container, Header, Title, Logo, ButtonRow, StyledButton, StyledSelect, TableWrapper, StyledTable } from './styles'
+import { useRouter } from 'next/navigation'
+import Button from '@/app/components/Button'
+import { Container, Header, Title, Logo, ButtonRow, StyledSelect, TableWrapper, StyledTable } from './styles'
 import { ProdutoForm } from '@/app/components/FormProduct'
 import { CategoriaForm } from '@/app/components/FormCategory'
 import { usePainelLojistaHandlers } from '@/app/hooks/useLojistaHandlers'
-import { FaClipboardList, FaBoxes, FaPlus, FaTimes } from 'react-icons/fa'
+import { FaClipboardList, FaBoxes, FaPlus, FaTimes, FaEdit } from 'react-icons/fa'
 import { PedidoCard } from '@/app/components/PedidoCard'
-
 
 export default function PainelLojista() {
   const [token, setToken] = useState<string | null>(null)
   const handlers = usePainelLojistaHandlers()
+  const router = useRouter() 
 
   useEffect(() => {
     const saved = localStorage.getItem('token_lojista')
@@ -33,21 +35,31 @@ export default function PainelLojista() {
     <Container>
       <Header>
         <Logo src="/ebuild.png" alt="logo" />
+        <Button
+          onClick={() => {
+            localStorage.removeItem('token_lojista') 
+            setToken(null) 
+            router.push('http://localhost:3001/') 
+          }}
+          style={{ marginLeft: 'auto', background: '#ccc', color: '#000', fontSize: '0.9rem', padding: '0.5rem 1rem' }}
+        >
+          Sair
+        </Button>
       </Header>
 
       <ButtonRow>
-        <StyledButton onClick={() => handlers.handleVerPedidos(token)} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <Button onClick={() => handlers.handleVerPedidos(token)} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <FaClipboardList />
           Ver Pedidos
-        </StyledButton>
-        <StyledButton onClick={() => handlers.handleVerEstoque(token)} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        </Button>
+        <Button onClick={() => handlers.handleVerEstoque(token)} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <FaBoxes />
           Ver Estoque
-        </StyledButton>
-        <StyledButton onClick={() => handlers.handleAbrirFormProduto(token)} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        </Button>
+        <Button onClick={() => handlers.handleAbrirFormProduto(token, null)} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <FaPlus />
           Criar Produto
-        </StyledButton>
+        </Button>
       </ButtonRow>
 
       {handlers.showForm && (
@@ -57,18 +69,15 @@ export default function PainelLojista() {
             setForm={handlers.setForm}
             categoriasObj={handlers.categoriasObj}
             loading={handlers.loading}
-            onSubmit={e => handlers.handleCreateProduto(e, token, () => handlers.handleVerEstoque(token))}
+            onSubmit={(e) => handlers.handleSubmitProduto(e, token, () => handlers.handleVerEstoque(token))}
             onCancel={() => handlers.setShowForm(false)}
-            onNovaCategoria={() => {
-              console.log('Abrindo formulário de nova categoria');
-              handlers.setShowCategoriaForm(true);
-            }}
+            onNovaCategoria={() => handlers.setShowCategoriaForm(true)}
           />
           {handlers.showCategoriaForm && (
             <CategoriaForm
               novaCategoria={handlers.novaCategoria}
               setNovaCategoria={handlers.setNovaCategoria}
-              onSubmit={e => handlers.handleCriarCategoria(e, token)}
+              onSubmit={(e) => handlers.handleCriarCategoria(e, token)}
               onCancel={() => handlers.setShowCategoriaForm(false)}
             />
           )}
@@ -82,7 +91,7 @@ export default function PainelLojista() {
               <label>Filtrar por categoria: </label>
               <StyledSelect
                 value={handlers.categoriaSelecionada}
-                onChange={e => handlers.setCategoriaSelecionada(e.target.value)}
+                onChange={(e) => handlers.setCategoriaSelecionada(e.target.value)}
               >
                 <option value="">Todas</option>
                 {handlers.categorias.map((cat) => (
@@ -116,14 +125,21 @@ export default function PainelLojista() {
                         <td>R$ {produto.preco.toFixed(2)}</td>
                         <td>{produto.categoriaProduto?.nome}</td>
                         <td>
-                          <StyledButton
-                            style={{ background: '#ff5252', color: '#fff', padding: '0.5rem 1rem', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: 6 }}
+                          <Button
+                            onClick={() => handlers.handleEditProduto(produto)}
+                            style={{ background: '#4caf50', color: '#fff', padding: '0.5rem 1rem', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: 6 }}
+                          >
+                            <FaEdit />
+                            Editar
+                          </Button>
+                          <Button
                             onClick={() => handlers.handleDeleteProduto(produto.id, token, () => handlers.handleVerEstoque(token))}
                             disabled={handlers.loading}
+                            style={{ background: '#ff5252', color: '#fff', padding: '0.5rem 1rem', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: 6 }}
                           >
                             <FaTimes />
                             Deletar
-                          </StyledButton>
+                          </Button>
                         </td>
                       </tr>
                     ))}
